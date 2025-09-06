@@ -1,28 +1,52 @@
-# Core dependencies for HAILO AI HAT development
-# PyHailoRT - Python bindings for HailoRT
+# HAILO AI HAT Development - Unified Requirements
+# This file contains all dependencies for development, testing, and production
+
+# === CORE HARDWARE DEPENDENCIES ===
+# PyHailoRT - Python bindings for HailoRT (hardware-specific)
+# NOTE: This will fail on non-HAILO hardware. Use --skip-dependency if needed.
 hailo-platform>=4.17.0
 
-# Computer Vision and AI
+# === COMPUTER VISION AND AI ===
 opencv-python>=4.8.0
 numpy>=1.21.0
 pillow>=9.0.0
 
-# Data processing
+# === DATA PROCESSING ===
 pandas>=1.5.0
 
-# Configuration and utilities
+# === CONFIGURATION AND UTILITIES ===
 pyyaml>=6.0
 click>=8.0.0
 python-dotenv>=0.19.0
 
-# Logging and monitoring
+# === LOGGING AND MONITORING ===
 loguru>=0.6.0
 
-# Testing (optional)
+# === TESTING FRAMEWORK ===
 pytest>=7.0.0
+pytest-cov>=4.0.0
+pytest-mock>=3.10.0
 pytest-asyncio>=0.21.0
 
-# Development tools (optional)
-black>=22.0.0
-flake8>=5.0.0
-mypy>=0.991
+# === CODE QUALITY TOOLS ===
+black>=23.0.0
+flake8>=6.0.0
+isort>=5.12.0
+mypy>=1.0.0
+
+# === DOCUMENTATION ===
+sphinx>=6.0.0
+sphinx-rtd-theme>=1.2.0
+
+# === DEVELOPMENT TOOLS ===
+pre-commit>=3.0.0
+ipython>=8.0.0
+jupyter>=1.0.0
+
+# === PROFILING AND DEBUGGING ===
+memory-profiler>=0.60.0
+line-profiler>=4.0.0
+
+# === ADDITIONAL DEPENDENCIES FOR TESTING ===
+# These are useful for CI/CD and development environments
+psutil>=5.8.0

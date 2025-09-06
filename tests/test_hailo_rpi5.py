@@ -1,23 +1,23 @@
 """
-Test Suite for HAILO RPI5 Package
+Legacy test file - Tests have been migrated to pytest format.
 
-Unit tests for the core functionality of the HAILO AI HAT package.
+This file is kept for backward compatibility but the actual tests
+are now in the unit/ and integration/ directories using pytest.
+
+To run the new tests:
+    pytest tests/unit/           # Unit tests
+    pytest tests/integration/    # Integration tests (requires hardware)
+    pytest tests/               # All tests
 """
 
-import unittest
-import numpy as np
-from unittest.mock import Mock, patch, MagicMock
-import sys
-from pathlib import Path
+# This file is deprecated - use pytest tests instead
+import warnings
 
-# Add project root to path
-sys.path.insert(0, str(Path(__file__).parent.parent))
-
-from src.core.device_manager import HailoDeviceManager
-from src.core.inference_engine import HailoInferenceEngine
-from src.utils.model_utils import ModelUtils
-from src.utils.preprocessing import PreprocessingUtils
-from src.utils.postprocessing import PostprocessingUtils
+warnings.warn(
+    "test_hailo_rpi5.py is deprecated. Use 'pytest tests/' to run the new test suite.",
+    DeprecationWarning,
+    stacklevel=2
+)
 
 
 class TestDeviceManager(unittest.TestCase):

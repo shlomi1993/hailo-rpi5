@@ -19,21 +19,11 @@ from src.utils import PreprocessingUtils, PostprocessingUtils
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 
-def setup_logging():
-    """
-    Setup logging configuration.
-    """
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-
-
 def load_imagenet_classes() -> list:
-    """Load ImageNet class names (mock implementation)."""
-    # In a real implementation, you would load this from a file
-    return [f"class_{i}" for i in range(1000)]
+    return [f"class_{i}" for i in range(1000)]  # In a real implementation, you would load this from a file
 
 
 def main():
-    """Main function."""
     parser = argparse.ArgumentParser(description='HAILO Classification Example')
     parser.add_argument('--hef', required=True, help='Path to HEF model file')
     parser.add_argument('--image', required=True, help='Path to input image')
@@ -42,7 +32,7 @@ def main():
 
     args = parser.parse_args()
 
-    setup_logging()
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     logger = logging.getLogger(__name__)
 
     try:

@@ -2,69 +2,118 @@
 """
 Object Detection Example
 
-This example demonstrates object detection using HAILO AI HAT
-with a YOLO-based detection model.
+This example demonstrates object detection using HAILO AI HAT with a YOLO-based detection model.
 """
 
 import sys
 import logging
-from pathlib import Path
 import argparse
-import numpy as np
 
-# Add project root to path
-sys.path.insert(0, str(Path(__file__).parent.parent))
+from pathlib import Path
 
 from src import HailoDeviceManager, HailoInferenceEngine
 from src.utils import PreprocessingUtils, PostprocessingUtils
 
-
-def setup_logging():
-    """Setup logging configuration."""
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    )
+# Add project root to path
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 
-def load_coco_classes() -> list:
-    """Load COCO class names."""
-    # Common COCO classes
-    classes = [
-        'person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus',
-        'train', 'truck', 'boat', 'traffic light', 'fire hydrant',
-        'stop sign', 'parking meter', 'bench', 'bird', 'cat', 'dog',
-        'horse', 'sheep', 'cow', 'elephant', 'bear', 'zebra', 'giraffe',
-        'backpack', 'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee',
-        'skis', 'snowboard', 'sports ball', 'kite', 'baseball bat',
-        'baseball glove', 'skateboard', 'surfboard', 'tennis racket',
-        'bottle', 'wine glass', 'cup', 'fork', 'knife', 'spoon', 'bowl',
-        'banana', 'apple', 'sandwich', 'orange', 'broccoli', 'carrot',
-        'hot dog', 'pizza', 'donut', 'cake', 'chair', 'couch',
-        'potted plant', 'bed', 'dining table', 'toilet', 'tv', 'laptop',
-        'mouse', 'remote', 'keyboard', 'cell phone', 'microwave',
-        'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock',
-        'vase', 'scissors', 'teddy bear', 'hair drier', 'toothbrush'
-    ]
-    return classes
+COCO_COMMON_CLASSES = [
+    'person',
+    'bicycle',
+    'car',
+    'motorcycle',
+    'airplane',
+    'bus',
+    'train',
+    'truck',
+    'boat',
+    'traffic light',
+    'fire hydrant',
+    'stop sign',
+    'parking meter',
+    'bench',
+    'bird',
+    'cat',
+    'dog',
+    'horse',
+    'sheep',
+    'cow',
+    'elephant',
+    'bear',
+    'zebra',
+    'giraffe',
+    'backpack',
+    'umbrella',
+    'handbag',
+    'tie',
+    'suitcase',
+    'frisbee',
+    'skis',
+    'snowboard',
+    'sports ball',
+    'kite',
+    'baseball bat',
+    'baseball glove',
+    'skateboard',
+    'surfboard',
+    'tennis racket',
+    'bottle',
+    'wine glass',
+    'cup',
+    'fork',
+    'knife',
+    'spoon',
+    'bowl',
+    'banana',
+    'apple',
+    'sandwich',
+    'orange',
+    'broccoli',
+    'carrot',
+    'hot dog',
+    'pizza',
+    'donut',
+    'cake',
+    'chair',
+    'couch',
+    'potted plant',
+    'bed',
+    'dining table',
+    'toilet',
+    'tv',
+    'laptop',
+    'mouse',
+    'remote',
+    'keyboard',
+    'cell phone',
+    'microwave',
+    'oven',
+    'toaster',
+    'sink',
+    'refrigerator',
+    'book',
+    'clock',
+    'vase',
+    'scissors',
+    'teddy bear',
+    'hair drier',
+    'toothbrush'
+]
 
 
 def main():
-    """Main function."""
     parser = argparse.ArgumentParser(description='HAILO Object Detection Example')
     parser.add_argument('--hef', required=True, help='Path to HEF model file')
     parser.add_argument('--image', required=True, help='Path to input image')
     parser.add_argument('--device-id', help='Specific device ID to use')
-    parser.add_argument('--confidence', type=float, default=0.5,
-                       help='Confidence threshold for detections')
-    parser.add_argument('--iou', type=float, default=0.5,
-                       help='IoU threshold for NMS')
-    parser.add_argument('--output-format', default='yolo',
-                       choices=['yolo', 'ssd'], help='Detection output format')
+    parser.add_argument('--confidence', type=float, default=0.5, help='Confidence threshold for detections')
+    parser.add_argument('--iou', type=float, default=0.5, help='IoU threshold for NMS')
+    parser.add_argument('--output-format', default='yolo', choices=['yolo', 'ssd'], help='Detection output format')
 
     args = parser.parse_args()
 
-    setup_logging()
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     logger = logging.getLogger(__name__)
 
     try:

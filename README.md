@@ -11,12 +11,13 @@ This project provides a comprehensive development framework for building AI appl
 - **Model Analysis**: Utilities for analyzing HEF model files and extracting metadata
 - **Performance Tools**: Benchmarking and profiling tools for optimization
 - **Examples**: Ready-to-run examples for common use cases
+- **Automated Installation**: One-command setup with virtual environment and dependency management
 
 ## Project Structure
 
 ```
 hailo-rpi5/
-├── hailo_rpi5/                 # Main package
+├── src/                        # Main package (renamed from hailo_rpi5)
 │   ├── core/                   # Core functionality
 │   │   ├── device_manager.py   # Device management
 │   │   └── inference_engine.py # Inference engine
@@ -32,9 +33,14 @@ hailo-rpi5/
 │   ├── device_info.py         # Device information tool
 │   ├── model_analyzer.py      # Model analysis tool
 │   └── benchmark.py           # Performance benchmark
+├── scripts/                    # Utility scripts
+│   └── download_models.sh     # Model download script
 ├── tests/                      # Unit tests
 ├── config/                     # Configuration files
-└── requirements.txt            # Dependencies
+├── install.sh                 # Automated installation script
+├── activate_hailo.sh          # Environment activation script (generated)
+├── requirements.txt           # Python dependencies
+└── pyproject.toml            # Project configuration
 ```
 
 ## Installation
@@ -45,12 +51,60 @@ hailo-rpi5/
 2. **HAILO drivers** installed and configured
 3. **Python 3.8+**
 
-### Install Dependencies
+### Automated Installation (Recommended)
+
+The easiest way to set up the development environment is using the provided installation script:
 
 ```bash
 # Clone the repository
 git clone <your-repo-url> hailo-rpi5
 cd hailo-rpi5
+
+# Run the automated installation script
+./install.sh
+```
+
+The installation script will:
+- Check platform compatibility (Raspberry Pi 5)
+- Verify and install system dependencies
+- Create a Python virtual environment
+- Install all Python dependencies
+- Set up project directories
+- Create an activation script for easy environment management
+- Run basic tests to verify the installation
+
+**Installation Script Options:**
+```bash
+./install.sh --help                    # Show help
+./install.sh --skip-platform-check     # Skip Raspberry Pi detection
+./install.sh --skip-tests             # Skip running tests
+```
+
+**Activating the Environment:**
+After installation, activate the environment using:
+```bash
+# Use the generated activation script (recommended)
+source activate_hailo.sh
+
+# Or manually activate the virtual environment
+source hailo-venv/bin/activate
+```
+
+### Manual Installation
+
+If you prefer to install manually or need custom configuration:
+
+```bash
+# Clone the repository
+git clone <your-repo-url> hailo-rpi5
+cd hailo-rpi5
+
+# Create virtual environment
+python3 -m venv hailo-venv
+source hailo-venv/bin/activate
+
+# Upgrade pip
+pip install --upgrade pip
 
 # Install Python dependencies
 pip install -r requirements.txt
@@ -68,9 +122,30 @@ The project requires PyHailoRT (HAILO's Python API). Install it according to HAI
 pip install hailo-platform
 ```
 
+**Note:** PyHailoRT is provided by Hailo and requires proper HAILO AI HAT hardware and drivers. The project will work in mock mode for development without the hardware.
+
 ## Quick Start
 
-### 1. Check Device Connectivity
+**Important:** Make sure to activate your environment first:
+```bash
+# If you used the automated installation
+source activate_hailo.sh
+
+# Or manually activate if you installed manually
+source hailo-venv/bin/activate
+```
+
+### 1. Download Models (Optional)
+
+```bash
+# Download sample models
+./scripts/download_models.sh
+
+# List available models in the project
+find models/ -name "*.hef" -type f
+```
+
+### 2. Check Device Connectivity
 
 ```bash
 # Check if HAILO devices are detected
@@ -80,7 +155,7 @@ python tools/device_info.py
 python tools/device_info.py --hef path/to/your/model.hef
 ```
 
-### 2. Analyze a Model
+### 3. Analyze a Model
 
 ```bash
 # Analyze HEF model file
@@ -93,7 +168,7 @@ python tools/model_analyzer.py path/to/your/model.hef --output model_analysis.js
 python tools/model_analyzer.py path/to/your/model.hef --validate
 ```
 
-### 3. Run Classification Example
+### 4. Run Classification Example
 
 ```bash
 # Run image classification
@@ -103,7 +178,7 @@ python examples/classification_example.py \
     --top-k 5
 ```
 
-### 4. Run Object Detection Example
+### 5. Run Object Detection Example
 
 ```bash
 # Run object detection
@@ -114,7 +189,7 @@ python examples/detection_example.py \
     --iou 0.5
 ```
 
-### 5. Benchmark Performance
+### 6. Benchmark Performance
 
 ```bash
 # Run performance benchmark
@@ -263,17 +338,50 @@ PostprocessingUtils.get_top_k_predictions(probabilities, k, class_names)
 
 ## Testing
 
-Run the test suite:
+The project uses **pytest** for modern, comprehensive testing. Tests are organized into unit and integration categories.
+
+### Running Tests
 
 ```bash
 # Run all tests
-python -m pytest tests/
+pytest tests/
 
-# Run with coverage
-python -m pytest tests/ --cov=hailo_rpi5
+# Run only unit tests (fast, no hardware required)
+pytest tests/unit/
 
-# Run specific test
-python -m pytest tests/test_hailo_rpi5.py::TestDeviceManager
+# Run integration tests (requires HAILO hardware)
+pytest tests/integration/
+
+# Run with coverage reporting
+pytest tests/ --cov=src --cov-report=html
+
+# Run specific test files or classes
+pytest tests/unit/test_device_manager.py
+pytest tests/unit/test_inference_engine.py::TestHailoInferenceEngine
+```
+
+### Test Categories
+
+- **Unit Tests** (`tests/unit/`): Fast tests that don't require hardware
+  - Device manager functionality
+  - Inference engine logic
+  - Utility functions
+  - Preprocessing/postprocessing
+
+- **Integration Tests** (`tests/integration/`): Tests requiring actual HAILO hardware
+  - End-to-end inference pipeline
+  - Hardware communication
+  - Performance benchmarks
+
+### Make Commands
+
+For convenience, you can also use:
+
+```bash
+make test              # Run all tests
+make test-unit         # Unit tests only
+make test-integration  # Integration tests only
+make test-coverage     # Run tests with coverage report
 ```
 
 ## Troubleshooting
@@ -307,6 +415,64 @@ Enable debug logging:
 import logging
 logging.basicConfig(level=logging.DEBUG)
 ```
+
+## Troubleshooting
+
+### Installation Issues
+
+**Installation script fails:**
+```bash
+# Check system requirements
+python3 --version  # Should be 3.8+
+cat /proc/device-tree/model  # Should show Raspberry Pi 5
+
+# Run with verbose output
+./install.sh --skip-tests
+
+# Check log for specific errors
+```
+
+**Virtual environment issues:**
+```bash
+# Remove existing environment and reinstall
+rm -rf hailo-venv
+./install.sh
+```
+
+**PyHailoRT not found:**
+```bash
+# Verify HAILO drivers are installed
+ls /opt/hailo/  # Should contain HailoRT installation
+
+# Check if PyHailoRT is available in system Python
+python3 -c "import hailo_platform.pyhailort"
+
+# If not available, install manually or contact HAILO support
+```
+
+**Permission errors:**
+```bash
+# Ensure user has access to HAILO devices
+sudo usermod -a -G hailo $USER
+# Log out and back in for group changes to take effect
+```
+
+### Runtime Issues
+
+**Device not found:**
+- Ensure HAILO AI HAT is properly connected
+- Verify drivers are loaded: `lsmod | grep hailo`
+- Check device permissions: `ls -la /dev/hailo*`
+
+**Model loading fails:**
+- Verify HEF file integrity
+- Check model compatibility with `python tools/model_analyzer.py --validate`
+- Ensure sufficient memory is available
+
+**Performance issues:**
+- Monitor system resources: `htop`, `free -h`
+- Check thermal throttling: `vcgencmd measure_temp`
+- Use performance governor: `sudo cpufreq-set -g performance`
 
 ## Contributing
 
