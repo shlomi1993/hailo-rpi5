@@ -1,20 +1,17 @@
 """
 HAILO Inference Engine
 
-Provides high-level interface for running inference on HAILO AI HAT
-using PyHailoRT with support for various input/output formats.
+Provides high-level interface for running inference on HAILO AI HAT using PyHailoRT with support for various input/output formats.
 """
-
-from typing import Dict, List, Optional, Union, Tuple, Any
 import logging
 import numpy as np
-from pathlib import Path
 import time
+
+from typing import Dict, Optional, Any
 
 try:
     import hailo_platform.pyhailort.pyhailort as hailort
-    from hailo_platform.pyhailort import InferVStreams, InputVStreamParams, OutputVStreamParams
-    from hailo_platform.pyhailort import HailoStreamInterface, FormatType
+    from hailo_platform.pyhailort import InferVStreams, InputVStreamParams, OutputVStreamParams, FormatType
     HAILO_AVAILABLE = True
 except ImportError as e:
     logging.warning(f"PyHailoRT not available: {e}")
@@ -27,10 +24,8 @@ class HailoInferenceEngine:
     """
     High-level inference engine for HAILO AI HAT.
 
-    Provides easy-to-use interface for running inference with preprocessing
-    and postprocessing capabilities.
+    Provides easy-to-use interface for running inference with preprocessing and postprocessing capabilities.
     """
-
     def __init__(self, device_manager: HailoDeviceManager):
         """
         Initialize inference engine.
@@ -47,27 +42,23 @@ class HailoInferenceEngine:
         if not HAILO_AVAILABLE:
             raise RuntimeError("PyHailoRT is not available.")
 
-    def setup_inference_pipeline(self, network_group_name: Optional[str] = None,
-                                batch_size: int = 1) -> bool:
+    def setup_inference_pipeline(self, network_group_name: Optional[str] = None) -> bool:
         """
         Setup inference pipeline for the specified network group.
 
         Args:
             network_group_name: Name of network group to use
-            batch_size: Batch size for inference
 
         Returns:
             True if successful, False otherwise
         """
         try:
-            # Get the configured network group
             if network_group_name:
                 if network_group_name not in self.device_manager.network_groups:
                     self.logger.error(f"Network group '{network_group_name}' not configured")
                     return False
                 network_group = self.device_manager.network_groups[network_group_name]
-            else:
-                # Use first available network group
+            else:  # Use first available network group
                 if not self.device_manager.network_groups:
                     self.logger.error("No network groups configured")
                     return False

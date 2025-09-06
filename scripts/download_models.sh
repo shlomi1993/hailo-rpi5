@@ -39,7 +39,7 @@ create_directories() {
     log_info "Creating directories..."
     mkdir -p "$MODELS_DIR"
     mkdir -p "$TEMP_DIR"
-    
+
     # Create subdirectories for different model types
     mkdir -p "$MODELS_DIR/classification"
     mkdir -p "$MODELS_DIR/detection"
@@ -50,14 +50,14 @@ create_directories() {
 # Check dependencies
 check_dependencies() {
     log_info "Checking dependencies..."
-    
+
     if ! command -v wget &> /dev/null && ! command -v curl &> /dev/null; then
-        log_error "Neither wget nor curl is available. Please install one of them."
-        exit 1
+    log_error "Neither wget nor curl is available. Please install one of them."
+    exit 1
     fi
-    
+
     if ! command -v unzip &> /dev/null; then
-        log_error "unzip is not available. Please install it."
+    log_error "unzip is not available. Please install it."
         exit 1
     fi
 }
@@ -68,10 +68,10 @@ download_file() {
     local output_path="$2"
     local max_retries=3
     local retry_count=0
-    
+
     while [ $retry_count -lt $max_retries ]; do
         log_info "Downloading $(basename "$output_path") (attempt $((retry_count + 1))/$max_retries)..."
-        
+
         if command -v wget &> /dev/null; then
             if wget -q --show-progress --timeout=30 -O "$output_path" "$url"; then
                 return 0
@@ -81,14 +81,14 @@ download_file() {
                 return 0
             fi
         fi
-        
+
         retry_count=$((retry_count + 1))
         if [ $retry_count -lt $max_retries ]; then
             log_warning "Download failed, retrying in 5 seconds..."
             sleep 5
         fi
     done
-    
+
     log_error "Failed to download $url after $max_retries attempts"
     return 1
 }
@@ -100,16 +100,16 @@ declare -A MODELS=(
     ["resnet50_classification"]="classification|https://example.com/models/resnet50.hef|ResNet-50 image classification model"
     ["mobilenet_v2_classification"]="classification|https://example.com/models/mobilenet_v2.hef|MobileNet-v2 classification model"
     ["efficientnet_classification"]="classification|https://example.com/models/efficientnet.hef|EfficientNet classification model"
-    
+
     # Object detection models
     ["yolov5s_detection"]="detection|https://example.com/models/yolov5s.hef|YOLOv5s object detection model"
     ["yolov8n_detection"]="detection|https://example.com/models/yolov8n.hef|YOLOv8n object detection model"
     ["ssd_mobilenet_detection"]="detection|https://example.com/models/ssd_mobilenet.hef|SSD MobileNet detection model"
-    
+
     # Segmentation models
     ["deeplabv3_segmentation"]="segmentation|https://example.com/models/deeplabv3.hef|DeepLabv3 segmentation model"
     ["unet_segmentation"]="segmentation|https://example.com/models/unet.hef|U-Net segmentation model"
-    
+
     # Pose estimation models
     ["openpose_pose"]="pose|https://example.com/models/openpose.hef|OpenPose human pose estimation model"
 )
@@ -126,25 +126,25 @@ declare -A HAILO_ZOO_MODELS=(
 download_model() {
     local model_name="$1"
     local model_info="${MODELS[$model_name]}"
-    
+
     IFS='|' read -r category url description <<< "$model_info"
-    
+
     local filename="$(basename "$url")"
     local target_dir="$MODELS_DIR/$category"
     local target_path="$target_dir/$filename"
-    
+
     if [ -f "$target_path" ]; then
         log_warning "Model $model_name already exists at $target_path"
         return 0
     fi
-    
+
     log_info "Downloading $description..."
-    
+
     if download_file "$url" "$target_path"; then
         # Verify the file is a valid HEF (basic check)
         if file "$target_path" | grep -q "data" || [[ "$filename" == *.hef ]]; then
             log_success "Downloaded $model_name to $target_path"
-            
+
             # Create a metadata file
             cat > "${target_path%.hef}.info" << EOF
 {
@@ -170,15 +170,15 @@ EOF
 list_models() {
     echo -e "\n${BLUE}Available Models:${NC}"
     echo "=================="
-    
+
     for model_name in "${!MODELS[@]}"; do
         IFS='|' read -r category url description <<< "${MODELS[$model_name]}"
         printf "%-25s %-15s %s\n" "$model_name" "[$category]" "$description"
     done
-    
+
     echo -e "\n${BLUE}HAILO Model Zoo Models:${NC}"
     echo "======================="
-    
+
     for model_name in "${!HAILO_ZOO_MODELS[@]}"; do
         IFS='|' read -r category url description <<< "${HAILO_ZOO_MODELS[$model_name]}"
         printf "%-25s %-15s %s\n" "$model_name" "[$category]" "$description"
@@ -189,9 +189,9 @@ list_models() {
 download_category() {
     local target_category="$1"
     local count=0
-    
+
     log_info "Downloading all $target_category models..."
-    
+
     for model_name in "${!MODELS[@]}"; do
         IFS='|' read -r category url description <<< "${MODELS[$model_name]}"
         if [ "$category" = "$target_category" ]; then
@@ -199,7 +199,7 @@ download_category() {
             count=$((count + 1))
         fi
     done
-    
+
     # Also check HAILO Zoo models
     for model_name in "${!HAILO_ZOO_MODELS[@]}"; do
         IFS='|' read -r category url description <<< "${HAILO_ZOO_MODELS[$model_name]}"
@@ -208,7 +208,7 @@ download_category() {
             count=$((count + 1))
         fi
     done
-    
+
     log_success "Attempted to download $count models in category: $target_category"
 }
 
@@ -216,23 +216,23 @@ download_category() {
 download_hailo_zoo_model() {
     local model_name="$1"
     local model_info="${HAILO_ZOO_MODELS[$model_name]}"
-    
+
     IFS='|' read -r category url description <<< "$model_info"
-    
+
     local filename="$(basename "$url")"
     local target_dir="$MODELS_DIR/$category"
     local target_path="$target_dir/$filename"
-    
+
     if [ -f "$target_path" ]; then
         log_warning "Model $model_name already exists at $target_path"
         return 0
     fi
-    
+
     log_info "Downloading $description from HAILO Model Zoo..."
-    
+
     if download_file "$url" "$target_path"; then
         log_success "Downloaded $model_name to $target_path"
-        
+
         # Create a metadata file
         cat > "${target_path%.hef}.info" << EOF
 {
@@ -253,25 +253,25 @@ EOF
 # Download sample models (quick start set)
 download_samples() {
     log_info "Downloading sample models for quick start..."
-    
+
     # Download one model from each category
     local sample_models=(
         "mobilenet_v2_classification"
         "yolov5s_detection"
     )
-    
+
     for model in "${sample_models[@]}"; do
         if [[ -v "MODELS[$model]" ]]; then
             download_model "$model"
         fi
     done
-    
+
     # Also try HAILO Zoo samples
     local hailo_samples=(
         "mobilenet_hailo"
         "yolov5s_hailo"
     )
-    
+
     for model in "${hailo_samples[@]}"; do
         if [[ -v "HAILO_ZOO_MODELS[$model]" ]]; then
             download_hailo_zoo_model "$model"
@@ -283,17 +283,17 @@ download_samples() {
 show_downloaded() {
     echo -e "\n${BLUE}Downloaded Models:${NC}"
     echo "=================="
-    
+
     if [ ! -d "$MODELS_DIR" ]; then
         log_warning "Models directory doesn't exist yet"
         return
     fi
-    
+
     find "$MODELS_DIR" -name "*.hef" -type f | while read -r hef_file; do
         local size=$(du -h "$hef_file" | cut -f1)
         local relative_path="${hef_file#$MODELS_DIR/}"
         echo "  $relative_path ($size)"
-        
+
         # Show info if available
         local info_file="${hef_file%.hef}.info"
         if [ -f "$info_file" ]; then
@@ -350,7 +350,7 @@ EOF
 # Main function
 main() {
     local models_dir_override=""
-    
+
     # Parse arguments
     while [[ $# -gt 0 ]]; do
         case $1 in
@@ -434,7 +434,7 @@ main() {
                 ;;
         esac
     done
-    
+
     # If no command provided, show help
     show_help
 }

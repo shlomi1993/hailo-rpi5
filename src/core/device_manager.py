@@ -4,15 +4,14 @@ HAILO Device Manager
 Manages HAILO AI HAT device initialization, configuration, and lifecycle.
 Provides high-level interface for device management using PyHailoRT.
 """
+import logging
 
 from typing import List, Optional, Dict, Any
-import logging
 from pathlib import Path
 
 try:
     import hailo_platform.pyhailort.pyhailort as hailort
-    from hailo_platform.pyhailort import HEF, Device, VDevice, InferVStreams
-    from hailo_platform.pyhailort import ConfigureParams, InputVStreamParams, OutputVStreamParams
+    from hailo_platform.pyhailort import HEF, Device, VDevice, ConfigureParams
     HAILO_AVAILABLE = True
 except ImportError as e:
     logging.warning(f"PyHailoRT not available: {e}")
@@ -23,12 +22,9 @@ class HailoDeviceManager:
     """
     High-level manager for HAILO AI HAT devices.
 
-    Handles device discovery, initialization, and configuration
-    using PyHailoRT API.
+    Handles device discovery, initialization, and configuration using PyHailoRT API.
     """
-
     def __init__(self):
-        """Initialize the device manager."""
         self.device: Optional[Device] = None
         self.vdevice: Optional[VDevice] = None
         self.hef: Optional[HEF] = None
@@ -46,8 +42,7 @@ class HailoDeviceManager:
             List of device identifiers
         """
         try:
-            # Scan for PCIe devices (typical for AI HAT)
-            devices = Device.scan()
+            devices = Device.scan()  # Scan for PCIe devices (typical for AI HAT)
             device_ids = [str(device.device_id) for device in devices]
             self.logger.info(f"Found {len(device_ids)} HAILO devices: {device_ids}")
             return device_ids
@@ -94,15 +89,9 @@ class HailoDeviceManager:
             True if successful, False otherwise
         """
         try:
-            if device_ids:
-                self.vdevice = VDevice(device_ids)
-            else:
-                # Create vdevice with all available devices
-                self.vdevice = VDevice()
-
+            self.vdevice = VDevice(device_ids)
             self.logger.info("Created virtual device")
             return True
-
         except Exception as e:
             self.logger.error(f"Error creating vdevice: {e}")
             return False
@@ -126,7 +115,6 @@ class HailoDeviceManager:
             self.hef = HEF(str(hef_file))
             self.logger.info(f"Loaded HEF: {hef_path}")
 
-            # Get network group information
             network_groups = self.hef.get_network_groups()
             for ng in network_groups:
                 self.logger.info(f"Available network group: {ng.name}")
@@ -192,7 +180,7 @@ class HailoDeviceManager:
         Returns:
             Dictionary containing device information
         """
-        info = {}
+        info = dict()
 
         if self.device:
             try:
@@ -220,7 +208,6 @@ class HailoDeviceManager:
         return info
 
     def cleanup(self):
-        """Clean up resources."""
         try:
             if self.network_groups:
                 for ng_name, ng in self.network_groups.items():
