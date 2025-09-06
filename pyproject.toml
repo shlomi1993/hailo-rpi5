@@ -1,0 +1,130 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hailo-rpi5"
+version = "0.1.0"
+description = "HAILO AI HAT development framework for Raspberry Pi 5"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "HAILO RPI5 Developer", email = "developer@example.com"}
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+requires-python = ">=3.8"
+dependencies = [
+    "numpy>=1.21.0",
+    "opencv-python>=4.8.0",
+    "pillow>=9.0.0",
+    "pyyaml>=6.0",
+    "click>=8.0.0",
+    "python-dotenv>=0.19.0",
+    "loguru>=0.6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.0.0",
+    "pytest-xdist>=3.0.0",
+    "pytest-mock>=3.10.0",
+    "pytest-benchmark>=4.0.0",
+    "pytest-html>=3.1.0",
+    "black>=22.0.0",
+    "flake8>=5.0.0",
+    "mypy>=0.991",
+    "isort>=5.12.0",
+    "bandit>=1.7.0",
+    "coverage>=7.0.0",
+]
+hailo = [
+    "hailo-platform>=4.17.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/yourusername/hailo-rpi5"
+Repository = "https://github.com/yourusername/hailo-rpi5"
+Documentation = "https://github.com/yourusername/hailo-rpi5#readme"
+"Bug Reports" = "https://github.com/yourusername/hailo-rpi5/issues"
+
+[project.scripts]
+hailo-device-info = "hailo_rpi5.tools.device_info:main"
+hailo-model-analyzer = "hailo_rpi5.tools.model_analyzer:main"
+hailo-benchmark = "hailo_rpi5.tools.benchmark:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["hailo_rpi5*"]
+
+[tool.setuptools.package-data]
+hailo_rpi5 = ["config/*.yaml"]
+
+[tool.black]
+line-length = 100
+target-version = ['py38']
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "-v",
+    "--tb=short",
+    "--strict-markers",
+    "--strict-config",
+    "--cov=hailo_rpi5",
+    "--cov-report=term-missing",
+    "--cov-report=html:htmlcov",
+    "--cov-report=xml",
+    "--cov-fail-under=80",
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+    "device: marks tests that require HAILO device",
+    "model: marks tests that require model files",
+]
+filterwarnings = [
+    "error",
+    "ignore::UserWarning",
+    "ignore::DeprecationWarning",
+]
+testpaths = ["tests"]
+minversion = "7.0"
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+
+[[tool.mypy.overrides]]
+module = [
+    "cv2.*",
+    "hailo_platform.*",
+]
+ignore_missing_imports = true
