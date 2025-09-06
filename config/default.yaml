@@ -1,0 +1,44 @@
+# Configuration for HAILO AI HAT development
+
+# Model paths
+model_dir: ./models
+hef_extension: .hef
+
+# Device settings
+default_device_id: null
+stream_interface: PCIe
+timeout_ms: 10000
+
+# Preprocessing settings
+preprocessing:
+  target_size: [224, 224]
+  mean: [0.485, 0.456, 0.406]  # ImageNet mean
+  std: [0.229, 0.224, 0.225]   # ImageNet std
+  scale: 0.00392156862745098   # 1/255
+  color_format: RGB
+  model_format: NHWC
+
+# Postprocessing settings
+postprocessing:
+  confidence_threshold: 0.5
+  iou_threshold: 0.5
+  max_detections: 100
+  apply_nms: true
+
+# Performance settings
+inference:
+  batch_size: 1
+  benchmark_iterations: 100
+  enable_profiling: false
+
+# Logging settings
+logging:
+  level: INFO
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+# Output settings
+output:
+  save_results: false
+  results_dir: ./results
+  save_images: false
+  image_format: jpg
